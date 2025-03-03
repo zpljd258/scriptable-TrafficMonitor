@@ -1,0 +1,20 @@
+services:
+  scriptable-traffic-monitor:
+    image: scriptable-traffic-monitor
+    build: .
+    environment:
+      API_TOKEN: your_secret_token  # 设置一个安全的 TOKEN
+      API_PORT: 5000              # 设置 API 端口
+      ENABLE_API: "True"          # 启用 API, 设置为 "False" 可以禁用
+      TRAFFIC_DIRECTION: outbound
+      MONTHLY_TRAFFIC_GB: 200
+      RESET_DAY: 1
+      NETWORK_INTERFACE: eth0
+    volumes:
+      - /opt/docker/scriptable-TrafficMonitor/data:/data
+      - /etc/hostname:/etc/host_hostname:ro
+    restart: always
+    container_name: scriptable-traffic-monitor
+    network_mode: host
+    #ports: # 使用 host 网络模式时, 不需要端口映射
+    #  - "5000:5000"
