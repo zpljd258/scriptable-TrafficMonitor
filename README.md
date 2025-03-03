@@ -2,11 +2,9 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/zpljd258/scriptable-TrafficMonitor?style=social)](https://github.com/zpljd258/scriptable-TrafficMonitor/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/zpljd258/scriptable-TrafficMonitor?style=social)](https://github.com/zpljd258/scriptable-TrafficMonitor/network/members)
-[![GitHub license](https://img.shields.io/github/license/zpljd258/scriptable-TrafficMonitor)](https://github.com/zpljd258/scriptable-TrafficMonitor/blob/main/LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/zpljd/scriptable-trafficmonitor)](https://hub.docker.com/r/zpljd/scriptable-trafficmonitor)
 
 > 这是一个用于 [Scriptable](https://scriptable.app/) 应用的流量监控小组件，可以实时显示服务器的流量使用情况（支持多服务器）。
-
 
 ## ✨ 特性
 
@@ -73,31 +71,42 @@
     ```yaml
     services:
       traffic-monitor:
-        image: traffic-monitor
-        build: .
+        image: traffic-monitor  # 最终生成的镜像名称
+        build: .              # 使用当前目录下的 Dockerfile 构建镜像
         environment:
           API_TOKEN: your_secret_token  # ⚠️ 必须修改: 设置一个安全的 API Token
-          API_PORT: 5000              # API 端口，可以根据需要修改
-          ENABLE_API: "True"
-          TRAFFIC_DIRECTION: outbound
-          MONTHLY_TRAFFIC_GB: 200
-          RESET_DAY: 1
-          NETWORK_INTERFACE: eth0
+          API_PORT: 5000              # API 监听的端口，可以根据需要修改
+          ENABLE_API: "True"          # 是否启用 API，默认为启用，设置为 "False" 可以禁用
+          TRAFFIC_DIRECTION: outbound  # 流量方向，可选值：outbound（出站，默认）、bidirectional（双向）
+          MONTHLY_TRAFFIC_GB: 200     # 每月流量上限（GB），根据你的服务器套餐修改
+          RESET_DAY: 1              # 流量重置日期，默认为每月 1 号
+          NETWORK_INTERFACE: eth0    # 网络接口名称，通常不需要修改
         volumes:
-          - /opt/docker/traffic-monitor/data:/data
-          - /etc/hostname:/etc/host_hostname:ro
-        restart: always
-        container_name: traffic-monitor
-        network_mode: host
+          - /opt/docker/traffic-monitor/data:/data  # 将容器内的 /data 目录挂载到宿主机的 /opt/docker/traffic-monitor/data 目录，用于持久化存储流量数据
+          - /etc/hostname:/etc/host_hostname:ro    # 将容器内的 /etc/host_hostname 文件挂载到宿主机的 /etc/hostname 文件，只读模式，用于获取主机名
+        restart: always            # 容器自动重启策略，始终重启
+        container_name: traffic-monitor  # 容器名称
+        network_mode: host          # 使用 host 网络模式，容器将共享宿主机的网络栈，可以直接使用宿主机的 IP 地址和端口
     ```
 
     **配置说明:**
 
-    *   **`API_TOKEN`:**  **必须修改**，设置一个安全的 API Token。
-    *   **`API_PORT`:**  API 监听的端口, 默认5000。
-    *   **`ENABLE_API`:** 是否启用API, 默认为启用, 设置为 `"False"` 可以禁用.
-    *   **`MONTHLY_TRAFFIC_GB`:**  每月流量上限（GB），根据你的服务器套餐修改。
-    *   其他配置一般不需要修改，除非你有特殊需求。
+    *   **`image`:**  指定构建后生成的镜像名称。
+    *   **`build`:**  指定 Dockerfile 所在的路径，`.` 表示当前目录。
+    *   **`environment`:**  设置环境变量，用于配置容器内的应用程序。
+        *   **`API_TOKEN`:**  **必须修改**，设置一个安全的 API Token，用于 Scriptable 小组件访问 API 时的身份验证。
+        *   **`API_PORT`:**  API 监听的端口，Scriptable 小组件将通过这个端口访问 API。
+        *   **`ENABLE_API`:** 是否启用 API, 默认为 `True` (启用), 设置为 `"False"` 可以禁用. 如果禁用, 将不会启动 Flask Web 服务, 仅在后台持续计算流量.
+        *   **`TRAFFIC_DIRECTION`:**  流量计算方向，`outbound` 表示只计算出站流量，`bidirectional` 表示计算双向流量（出站和入站）。
+        *   **`MONTHLY_TRAFFIC_GB`:**  每月流量上限，单位为 GB。
+        *   **`RESET_DAY`:**  流量重置日期，设置为每月几号重置流量计数。
+        *   **`NETWORK_INTERFACE`:**  网络接口名称，通常是 `eth0`，如果你的服务器有多个网卡，可能需要根据实际情况修改。
+    *   **`volumes`:**  配置数据卷，用于持久化存储数据。
+        *   **`/opt/docker/traffic-monitor/data:/data`:**  将容器内的 `/data` 目录（用于存储流量数据）映射到宿主机的 `/opt/docker/traffic-monitor/data` 目录。这样，即使容器被删除，流量数据也不会丢失。
+        *   **`/etc/hostname:/etc/host_hostname:ro`:** 将容器内的 `/etc/host_hostname` 文件（用于获取主机名）映射到宿主机的 `/etc/hostname` 文件，并设置为只读模式 (`ro`)。
+    *   **`restart`:**  设置容器的重启策略。`always` 表示无论容器退出状态如何，都会自动重启。
+    *   **`container_name`:**  设置容器的名称。
+    *   **`network_mode`:**  设置容器的网络模式。`host` 表示容器使用宿主机的网络栈，这样容器可以直接使用宿主机的 IP 地址和端口，无需进行端口映射。
 
 4.  **构建并运行:**
 
