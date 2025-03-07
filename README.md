@@ -53,26 +53,18 @@
     *   **`MONTHLY_TRAFFIC_GB`:**  每月流量上限（GB），根据你的服务器套餐修改。
     *   其他配置一般不需要修改，除非你有特殊需求。
 
-### 方法二：使用 Docker Compose (适合本地构建)
+### 方法二：使用 Docker Compose
 
 1.  **准备工作:**
 
     *   服务器已安装 Docker 和 Docker Compose
 
-2.  **获取代码:**
-
-    ```bash
-    git clone https://github.com/zpljd258/scriptable-TrafficMonitor.git
-    cd scriptable-TrafficMonitor
-    ```
-
-3.  **修改配置 (docker-compose.yml):**
+2.  **修改配置 (docker-compose.yml):**
 
     ```yaml
     services:
-      traffic-monitor:
-        image: traffic-monitor  # 最终生成的镜像名称
-        build: .              # 使用当前目录下的 Dockerfile 构建镜像
+      scriptable-trafficmonitor:
+        image: zpljd/scriptable-trafficmonitor  # 镜像名称
         environment:
           API_TOKEN: your_secret_token  # ⚠️ 必须修改: 设置一个安全的 API Token
           API_PORT: 5000              # API 监听的端口，可以根据需要修改
@@ -82,11 +74,11 @@
           RESET_DAY: 1              # 流量重置日期，默认为每月 1 号
           NETWORK_INTERFACE: eth0    # 网络接口名称，通常不需要修改
         volumes:
-          - /opt/docker/traffic-monitor/data:/data  # 将容器内的 /data 目录挂载到宿主机的 /opt/docker/traffic-monitor/data 目录，用于持久化存储流量数据
+          - /opt/docker/scriptable-trafficmonitor/data:/data  # 将容器内的 /data 目录挂载到宿主机的 /opt/docker/traffic-monitor/data 目录，用于持久化存储流量数据
           - /etc/hostname:/etc/host_hostname:ro    # 将容器内的 /etc/host_hostname 文件挂载到宿主机的 /etc/hostname 文件，只读模式，用于获取主机名
         restart: always            # 容器自动重启策略，始终重启
-        container_name: traffic-monitor  # 容器名称
-        network_mode: host          # 使用 host 网络模式，容器将共享宿主机的网络栈，可以直接使用宿主机的 IP 地址和端口
+        container_name: scriptable-trafficmonitor  # 容器名称
+        network_mode: host          # 为了流量监控只使用 host 网络模式，容器将共享宿主机的网络栈，可以直接使用宿主机的 IP 地址和端口
     ```
 
     **配置说明:**
@@ -157,7 +149,7 @@ const servers = [
 **💡 提示:**
 
 *   为了方便阅读，建议修改服务器的 `hostname`（`/etc/hostname` 文件），使其简洁明了。`hostname` 的最大显示长度约为 15 个字符（取决于字体和具体字符）。
-*   为了获得最佳显示效果，建议最多配置 **6** 个服务器。 Scriptable 小组件会自动调整布局，但过多的服务器可能会导致显示错位或信息过于拥挤。 2-4个, 或者6个服务器的时候显示效果最佳.
+*   为了获得最佳显示效果，建议最多配置 **12** 个服务器。 Scriptable 小组件会自动调整布局，但过多的服务器可能会导致显示错位或信息过于拥挤。 2-4个, 或者6个服务器的时候显示效果最佳.
 
 ## 🤝 贡献
 
